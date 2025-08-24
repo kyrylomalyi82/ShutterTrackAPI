@@ -9,15 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
 class ShutterServiceTest {
 
     final String originalFileName = "_DSC4175.NEF";
-    final int EXPECTED_SHUTTER_COUNT = 1090;
 
     @Autowired
     private ShutterService shutterService;
@@ -61,7 +59,28 @@ class ShutterServiceTest {
         System.out.println(result);
 
         assertNotNull(result);
-        assertEquals(EXPECTED_SHUTTER_COUNT, result.getShutterCount());
+        assertEquals(1090, result.getShutterCount());
+    }
+
+    @Test
+    void shouldExtractShutterCountFromCanonCR2() throws Exception {
+        // Arrange
+        final String canonFileName = "cr2-sample-file.cr2";
+        final String expectedMimeType = "image/x-canon-cr2";
+
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(canonFileName);
+        assertNotNull(inputStream, "Test file not found: " + canonFileName);
+
+        MultipartFile testCR2 = new MockMultipartFile("file", canonFileName, expectedMimeType, inputStream);
+
+        // Act
+        ShutterResponseDTO result = shutterService.extractShutterCount(testCR2);
+
+        // Assert
+        assertNotNull(result, "Result should not be null");
+        assertNotNull(result.getShutterCount(), "Shutter count should not be null");
+        assertEquals(6 , result.getShutterCount());
+        assertEquals(canonFileName, result.getFileName(), "File name should match");
     }
 
 }
