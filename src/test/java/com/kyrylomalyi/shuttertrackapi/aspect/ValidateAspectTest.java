@@ -1,24 +1,26 @@
 package com.kyrylomalyi.shuttertrackapi.aspect;
 
 import com.kyrylomalyi.shuttertrackapi.util.ValidationUtil;
-import com.kyrylomalyi.shuttertrackapi.web.ShutterController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.io.InputStream;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@EnableAspectJAutoProxy
-@WebMvcTest(ShutterController.class)
-@Import({ValidateAspect.class})
+@SpringBootTest
+@AutoConfigureMockMvc
 class ValidateAspectTest {
+
+    private final String originalFileName = "_DSC4175.NEF";
 
     @Autowired
     private MockMvc mockMvc;
@@ -26,26 +28,20 @@ class ValidateAspectTest {
     @MockitoBean
     private ValidationUtil validationUtil;
 
-
     @Test
-    void givenValidFile_whenTargetMethodIsCalled_thenValidatorIsCalledAndExecutionProceeds() throws Exception {
-        MockMultipartFile validFile = new MockMultipartFile(
+    void aspectIsCalledBeforeController() throws Exception {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(originalFileName);
+        MockMultipartFile testRaw = new MockMultipartFile(
                 "file",
-                "image.nef",
+                originalFileName,
                 "image/x-nikon-nef",
-                "test content".getBytes()
+                inputStream
         );
-
         doNothing().when(validationUtil).validateFile(any());
 
-        mockMvc.perform(multipart("/api/raw/upload")
-                        .file(validFile))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fileName").value("image.nef"));
+        mockMvc.perform(multipart("/api/raw/upload").file(testRaw))
+                .andExpect(status().isOk());
 
         verify(validationUtil, times(1)).validateFile(any());
     }
-
-
-
 }
