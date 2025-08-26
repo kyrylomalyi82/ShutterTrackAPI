@@ -20,9 +20,9 @@ import java.util.List;
 @Service
 public class ShutterServiceImpl implements ShutterService {
 
-    public final List<ShutterCountExtractorStrategy> strategies;
+    private final List<ShutterCountExtractorStrategy> strategies;
 
-    public ShutterServiceImpl(List<ShutterCountExtractorStrategy> strategies) {
+    private ShutterServiceImpl(List<ShutterCountExtractorStrategy> strategies) {
         this.strategies = strategies;
         System.out.println(strategies);
     }
