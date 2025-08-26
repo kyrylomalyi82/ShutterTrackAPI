@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: ShutterTrackAPI
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+file:
+  validation:
+    # file max-size 150mb (could be changed)
+    max-size: 157286400
+    # allowed types of file
+    allowed-types: NEF,CR2,ORF,ARW,RW2,RWL,SRW
