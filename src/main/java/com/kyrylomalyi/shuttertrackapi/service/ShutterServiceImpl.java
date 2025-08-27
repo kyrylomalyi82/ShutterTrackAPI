@@ -22,7 +22,7 @@ public class ShutterServiceImpl implements ShutterService {
 
     private final List<ShutterCountExtractorStrategy> strategies;
 
-    private ShutterServiceImpl(List<ShutterCountExtractorStrategy> strategies) {
+    public ShutterServiceImpl(List<ShutterCountExtractorStrategy> strategies) {
         this.strategies = strategies;
         System.out.println(strategies);
     }
