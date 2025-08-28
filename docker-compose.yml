@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16.2
@@ -13,6 +11,29 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  shuttertrackapi:
+    image: eclipse-temurin:21-jre
+    container_name: shuttertrack_api
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: shutterdb
+      DB_USER: dev_user
+      DB_PASS: dev_password
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_DEV_SECRET: ${OAUTH_DEV_SECRET}
+      OAUTH_REDIRECT_URI: http://localhost:8080/login/oauth2/code/shutter-client
+      OAUTH_ISSUER_URI: http://localhost:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    volumes:
+      - ./target/ShutterTrackAPI-0.0.1-SNAPSHOT.jar:/app/shuttertrackapi.jar
+    command: ["java", "-jar", "/app/shuttertrackapi.jar"]
 
 volumes:
   postgres_data:
